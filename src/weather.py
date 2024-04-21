@@ -10,14 +10,19 @@ from IPython.display import clear_output
 class WeatherParser:
 
     @staticmethod
-    def __print_progress_bar(iteration, total, length=30, fill='█', info: Optional[str] = None) -> None:
+    def __print_progress_bar(
+            iteration: int, total: int, length: int = 30,
+            fill='█', main_data: Optional[str] = None, info: Optional[str] = None
+    ) -> None:
         percent = ("{0:.1f}").format(100 * (iteration / float(total)))
         filled_length = int(length * iteration // total)
-        bar = fill * filled_length + '-' * (length - filled_length)
+        bar = fill * filled_length + '—' * (length - filled_length)
+
+        if main_data is None: main_data = ""
+        if info is None: info = ""
 
         clear_output()
-        if info is not None: print(f'\r|{bar}| {percent}% : {info}', end='\r')
-        else: print(f'\r|{bar}| {percent}%', end='\r')
+        print(f'\r{main_data} : |{bar}| {percent}% -> {info}', end='\r')
 
         # completed
         if iteration == total: print()
@@ -30,16 +35,20 @@ class WeatherParser:
         return data
 
     @classmethod
-    def load_regions(cls):
-        url = "https://weather.rambler.ru/world/rossiya/"
+    def load_countries(cls) -> None:
+        ...
+
+    @classmethod
+    def load_regions(cls, __country_url: str = "rossiya/") -> None:
+        url = Urls.join("https://weather.rambler.ru/world/", __country_url)
         soup = Parser.parse(url)
 
-        regions: list[str] = [i.get("href") for i in soup.find_all("a", {"class": "kgSF"})]
-        count_regions: int = len(regions)
+        regions_data = soup.find_all("a", {"class": "kgSF"})
+        count_regions: int = len(regions_data)
         all_towns: dict = {}
 
-        _progress = 0
-        for entry in soup.find_all("a", {"class": "kgSF"}):
+        _progress: int = 0
+        for entry in regions_data:
             region_url = entry.get("href")
 
             std_url = Urls.join(url, region_url)
@@ -49,7 +58,7 @@ class WeatherParser:
                 all_towns[town.find("span", class_="lC50").text] = town.get("href")
 
             _progress += 1
-            cls.__print_progress_bar(_progress, count_regions, info=entry.text)
+            cls.__print_progress_bar(_progress, count_regions, main_data="Loading towns", info=entry.text)
 
         with open('data/towns.json', 'w', encoding="utf-8") as outfile:
             json.dump(all_towns, outfile, indent=4, ensure_ascii=False)
