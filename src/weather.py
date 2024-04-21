@@ -22,6 +22,13 @@ class WeatherParser:
         # completed
         if iteration == total: print()
 
+    @staticmethod
+    def __load_towns_data() -> dict:
+        with open('data/towns.json', 'r', encoding="utf-8") as file:
+            data = json.load(file)
+
+        return data
+
     @classmethod
     def load_regions(cls):
         url = "https://weather.rambler.ru/world/rossiya/"
@@ -46,3 +53,7 @@ class WeatherParser:
 
         with open('data/towns.json', 'w', encoding="utf-8") as outfile:
             json.dump(all_towns, outfile, indent=4, ensure_ascii=False)
+
+    @classmethod
+    def get_url_by_name(cls, __name: str) -> Optional[str]:
+        return cls.__load_towns_data().get(__name)
