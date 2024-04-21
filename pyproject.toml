@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "weatherapp"
+version = "0.1.0"
+description = ""
+authors = ["chebupelka <119750562+chebupelka8@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.31.0"
+lxml = "^5.2.1"
+bs4 = "^0.0.2"
+colorama = "^0.4.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
