@@ -12,7 +12,6 @@ lxml = "^5.2.1"
 bs4 = "^0.0.2"
 colorama = "^0.4.6"
 translate = "^3.6.1"
-geocoder = "^1.38.1"
 ipython = "^8.23.0"
 
 

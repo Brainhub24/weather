@@ -6,10 +6,6 @@ from .links import Urls
 from typing import Optional
 from IPython.display import clear_output
 
-from urllib.parse import urlsplit
-
-import os
-
 
 class WeatherParser:
 
@@ -38,6 +34,10 @@ class WeatherParser:
 
         return data
 
+    @staticmethod
+    def check_country_exists(country: str) -> bool:
+        return country in WeatherParser.__load_regions_data().keys()
+
     @classmethod
     def get_country_url_by_name(cls, __country_name: str) -> Optional[str]:
         soup = Parser.parse("https://weather.rambler.ru/world/")
@@ -47,7 +47,9 @@ class WeatherParser:
                 return entry.get("href")
 
     @classmethod
-    def load_towns(cls, __url: str, locality: str, data: dict) -> dict:
+    def load_towns(
+            cls, __url: str, locality: str, data: dict
+    ) -> dict:
         soup = Parser.parse(Urls.join(__url, locality))
         std_towns = soup.find_all("a", {"class": "MJZ5"})
 
@@ -71,19 +73,13 @@ class WeatherParser:
         res: dict = {}
 
         if count_regions != 0:
-
-            _progress: int = 0
             for entry in regions_data:
                 res = cls.load_towns(url, entry.get("href"), res)
 
-                _progress += 1
-                cls.__print_progress_bar(
-                    _progress, count_regions,
-                    main_data="Loading towns", info=f"{__country_name} : {entry.text}"
-                )
-
         else:
-            res = cls.load_towns("https://weather.rambler.ru/world/", __country_url, res)
+            res = cls.load_towns(
+                "https://weather.rambler.ru/world/", __country_url, res
+            )
 
         data = cls.__load_regions_data()
         data[__country_name] = res
