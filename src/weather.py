@@ -6,6 +6,10 @@ from .links import Urls
 from typing import Optional
 from IPython.display import clear_output
 
+from urllib.parse import urlsplit
+
+import os
+
 
 class WeatherParser:
 
@@ -14,7 +18,7 @@ class WeatherParser:
             iteration: int, total: int, length: int = 30,
             fill='█', main_data: Optional[str] = None, info: Optional[str] = None
     ) -> None:
-        percent = ("{0:.1f}").format(100 * (iteration / float(total)))
+        percent = "{0:.1f}".format(100 * (iteration / float(total)))
         filled_length = int(length * iteration // total)
         bar = fill * filled_length + '—' * (length - filled_length)
 
@@ -43,11 +47,17 @@ class WeatherParser:
                 return entry.get("href")
 
     @classmethod
-    def load_towns(cls, __url: str, data: dict) -> dict:
-        soup = Parser.parse(__url)
+    def load_towns(cls, __url: str, locality: str, data: dict) -> dict:
+        soup = Parser.parse(Urls.join(__url, locality))
+        std_towns = soup.find_all("a", {"class": "MJZ5"})
 
-        for town in soup.find_all("a", {"class": "MJZ5"}):
-            data[town.find("span", class_="lC50").text] = town.get("href")
+        if len(std_towns) != 0:  # region || country
+            for town in std_towns:
+                data[town.find("span", class_="lC50").text] = town.get("href")
+        
+        else:  # town
+            soup = Parser.parse(__url)
+            data[soup.find("a", {"href": locality}).text] = locality
 
         return data
 
@@ -58,14 +68,13 @@ class WeatherParser:
 
         regions_data = soup.find_all("a", {"class": "kgSF"})
         count_regions: int = len(regions_data)
-        all_towns: dict = {}
         res: dict = {}
 
         data = cls.__load_regions_data()
 
         _progress: int = 0
         for entry in regions_data:
-            res = cls.load_towns(Urls.join(url, entry.get("href")), res)
+            res = cls.load_towns(url, entry.get("href"), res)
 
             _progress += 1
             cls.__print_progress_bar(
