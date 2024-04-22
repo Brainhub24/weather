@@ -62,7 +62,7 @@ class WeatherParser:
         return data
 
     @classmethod
-    def load_regions_of_country(cls, __country_url: str = "rossiya/", __country_name: str = "Россия") -> None:
+    def load_localities_of_country(cls, __country_url: str = "rossiya/", __country_name: str = "Россия") -> None:
         url = Urls.join("https://weather.rambler.ru/world/", __country_url)
         soup = Parser.parse(url)
 
@@ -70,18 +70,22 @@ class WeatherParser:
         count_regions: int = len(regions_data)
         res: dict = {}
 
+        if count_regions != 0:
+
+            _progress: int = 0
+            for entry in regions_data:
+                res = cls.load_towns(url, entry.get("href"), res)
+
+                _progress += 1
+                cls.__print_progress_bar(
+                    _progress, count_regions,
+                    main_data="Loading towns", info=f"{__country_name} : {entry.text}"
+                )
+
+        else:
+            res = cls.load_towns("https://weather.rambler.ru/world/", __country_url, res)
+
         data = cls.__load_regions_data()
-
-        _progress: int = 0
-        for entry in regions_data:
-            res = cls.load_towns(url, entry.get("href"), res)
-
-            _progress += 1
-            cls.__print_progress_bar(
-                _progress, count_regions,
-                main_data="Loading towns", info=f"{__country_name} : {entry.text}"
-            )
-
         data[__country_name] = res
 
         with open('data/towns.json', 'w', encoding="utf-8") as outfile:
