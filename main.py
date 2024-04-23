@@ -20,4 +20,4 @@ if not WeatherParser.check_country_exists(country):
     )
 
 url = Urls.join("https://weather.rambler.ru/", WeatherParser.get_url_by_name(country, city))
-print(WeatherParser.load_weather(url))
+WeatherGraph.print_weather(WeatherParser.load_weather(url))

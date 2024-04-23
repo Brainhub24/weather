@@ -16,6 +16,12 @@ class Weather:
     morning: str
     day: str
 
+    # data
+    where: str
+    when: str
+    some_data: str
+    feels: str
+
     def __repr__(self) -> str:
         return f"Weather({self.now}, {self.night}, {self.day}, {self.morning})"
 
@@ -108,7 +114,14 @@ class WeatherParser:
     def load_weather(cls, __url: str) -> Weather:
         soup = Parser.parse(__url)
 
+        # weather data
         now: str = soup.find("div", {"class": "HhSR MBvM"}).text
         night, morning, day, *rest = [i.text for i in soup.find_all("span", {"class": "kJ4q"})]
 
-        return Weather(now, night, morning, day)
+        # titles
+        where: str = soup.find("div", {"class": "rICO"}).text
+        when: str = soup.find("div", {"class": "w4bT"}).text
+        some_data: str = soup.find("div", {"class": "TWnE"}).text
+        feels: str = soup.find("span", {"class": "iO0y"}).text
+
+        return Weather(now, night, morning, day, where, when, some_data, feels)
