@@ -6,6 +6,19 @@ from .links import Urls
 from typing import Optional
 from IPython.display import clear_output
 
+from dataclasses import dataclass
+
+
+@dataclass
+class Weather:
+    now: str
+    night: str
+    morning: str
+    day: str
+
+    def __repr__(self) -> str:
+        return f"Weather({self.now}, {self.night}, {self.day}, {self.morning})"
+
 
 class WeatherParser:
 
@@ -88,5 +101,14 @@ class WeatherParser:
             json.dump(data, outfile, indent=4, ensure_ascii=False)
 
     @classmethod
-    def get_url_by_name(cls, __name: str) -> Optional[str]:
-        return cls.__load_regions_data().get(__name)
+    def get_url_by_name(cls, __country_name: str, __name: str) -> Optional[str]:
+        return cls.__load_regions_data().get(__country_name).get(__name)
+    
+    @classmethod
+    def load_weather(cls, __url: str) -> Weather:
+        soup = Parser.parse(__url)
+
+        now: str = soup.find("div", {"class": "HhSR MBvM"}).text
+        night, morning, day, *rest = [i.text for i in soup.find_all("span", {"class": "kJ4q"})]
+
+        return Weather(now, night, morning, day)
