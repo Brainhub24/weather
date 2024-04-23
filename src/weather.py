@@ -4,9 +4,9 @@ from .parse import Parser
 from .links import Urls
 
 from typing import Optional
-from IPython.display import clear_output
-
 from dataclasses import dataclass
+
+from .utils.loading import LoadingAnimations
 
 
 @dataclass
@@ -27,24 +27,6 @@ class Weather:
 
 
 class WeatherParser:
-
-    @staticmethod
-    def __print_progress_bar(
-            iteration: int, total: int, length: int = 30,
-            fill='█', main_data: Optional[str] = None, info: Optional[str] = None
-    ) -> None:
-        percent = "{0:.1f}".format(100 * (iteration / float(total)))
-        filled_length = int(length * iteration // total)
-        bar = fill * filled_length + '—' * (length - filled_length)
-
-        if main_data is None: main_data = ""
-        if info is None: info = ""
-
-        clear_output()
-        print(f'\r{main_data} : |{bar}| {percent}% -> {info}', end='\r')
-
-        # completed
-        if iteration == total: print()
 
     @staticmethod
     def __load_regions_data() -> dict:
